@@ -1,14 +1,15 @@
-from typing import List, Dict
+from typing import Dict, List
+
 from quixstreams import Application
 
+from src import config
 from src.kraken_api import KrakenWebsocketTradeAPI
 
-from src import config
+from loguru import logger
+
 
 def produce_trades(
-    kafka_broker_adress: str,      
-    kafka_topic_name: str,
-    product_id: str
+    kafka_broker_adress: str, kafka_topic_name: str, product_id: str
 ) -> None:
     """
     Reads trades from the Kraken websocket API and saves them into a Kafka topic.
@@ -26,38 +27,37 @@ def produce_trades(
     # Define a topic "my_topic" with JSON serialization
     topic = app.topic(name=kafka_topic_name, value_serializer='json')
 
-    #event = {"id": "1", "text": "Lorem ipsum dolor sit amet"}
+    # event = {"id": "1", "text": "Lorem ipsum dolor sit amet"}
 
     # Create an instance of Kraken API
     kraken_api = KrakenWebsocketTradeAPI(product_id=product_id)
 
+    logger.info('Creating the producer')
+
     # Create a Producer instance
     with app.get_producer() as producer:
-
         while True:
-            #Get trades from the Kraken API
+            # Get trades from the Kraken API
             trades: List[Dict] = kraken_api.get_trades()
 
             for trade in trades:
-
-                # Serialize an event using the defined Topic 
-                message = topic.serialize(key=trade["product_id"], value=trade)
+                # Serialize an event using the defined Topic
+                message = topic.serialize(key=trade['product_id'], value=trade)
 
                 # Produce a message into the Kafka topic
-                producer.produce(
-                    topic=topic.name, 
-                    value=message.value, 
-                    key=message.key
-                )
+                producer.produce(topic=topic.name, value=message.value, key=message.key)
 
-                print('Message sent !')
+                logger.info('Message sent !')
+                logger.info(trade)
 
                 from time import sleep
-                sleep(2)
 
-if __name__ == "__main__":
+                sleep(1)
+
+
+if __name__ == '__main__':
     produce_trades(
-        kafka_broker_adress = config.kafka_broker_adress, #"redpanda-0:9092", #localhost:19092 , "redpanda-0:9092"
-        kafka_topic_name = config.kafka_topic_name,
-        product_id = config.product_id,
+        kafka_broker_adress=config.kafka_broker_adress,  # "redpanda-0:9092", #localhost:19092 , "redpanda-0:9092"
+        kafka_topic_name=config.kafka_topic_name,
+        product_id=config.product_id,
     )

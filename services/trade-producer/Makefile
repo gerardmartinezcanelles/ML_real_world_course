@@ -6,5 +6,8 @@ run: build
 	--env KAFKA_BROKER_ADDRESS=redpanda-0:9092 \
 	trade-producer 
 
+lint:
+	ruff check --fix
 
-## I can just use make run and it will run both
+format:
+	ruff format .
