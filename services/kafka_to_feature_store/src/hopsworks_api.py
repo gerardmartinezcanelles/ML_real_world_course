@@ -3,10 +3,9 @@ import pandas as pd
 
 from src.config import config
 
+
 def push_data_to_feature_store(
-    feature_group_name: str,
-    feature_group_version :str,
-    data : dict
+    feature_group_name: str, feature_group_version: str, data: dict
 ) -> None:
     """
     Pushes given `data` to the feature store, writing it to the feature group
@@ -19,8 +18,7 @@ def push_data_to_feature_store(
     """
 
     project = hopsworks.login(
-        project= config.hopsworks_project_name,
-        api_key_value = config.api_key_value
+        project=config.hopsworks_project_name, api_key_value=config.api_key_value
     )
 
     # Get feature store
@@ -30,16 +28,18 @@ def push_data_to_feature_store(
 
     # Get or create the 'transactions' feature group
     ohlc_feature_group = feature_store.get_or_create_feature_group(
-        name = feature_group_name,
-        version= feature_group_version,
-        description="OHLC data coming from Kraken",
-        primary_key=["product_id","timestamp"],
-        event_time="timestamp",
-        online_enabled=True
+        name=feature_group_name,
+        version=feature_group_version,
+        description='OHLC data coming from Kraken',
+        primary_key=['product_id', 'timestamp'],
+        event_time='timestamp',
+        online_enabled=True,
     )
 
     # Transform data into pandas dataframe
     data = pd.DataFrame([data])
-    
+
     # Insert data into feature group
-    ohlc_feature_group.insert(data, write_options={"start_offline_materialization": False})
+    ohlc_feature_group.insert(
+        data, write_options={'start_offline_materialization': False}
+    )
