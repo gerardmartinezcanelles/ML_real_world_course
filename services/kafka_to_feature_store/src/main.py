@@ -56,8 +56,12 @@ def kafka_to_feature_store (
                     feature_group_version = feature_group_version,
                     data = ohlc
                 )
-        
-        consumer.store_offset(message=msg)
+            # Store the offset of the processed message on the Consumer 
+            # for the auto-commit mechanism.
+            # It will send it to Kafka in the background.
+            # Storing offset only after the message is processed enables at-least-once delivery
+            # guarantees.
+            consumer.store_offset(message=msg)
                 
 
 

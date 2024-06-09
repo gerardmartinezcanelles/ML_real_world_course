@@ -42,4 +42,4 @@ def push_data_to_feature_store(
     data = pd.DataFrame([data])
     
     # Insert data into feature group
-    ohlc_feature_group.insert(data)
+    ohlc_feature_group.insert(data, write_options={"start_offline_materialization": False})
