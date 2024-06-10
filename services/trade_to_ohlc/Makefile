@@ -1,3 +1,6 @@
+run-dev:
+	poetry run python src/main.py
+
 build:
 	docker build -t trade_to_ohlc .
 
@@ -10,7 +13,9 @@ run: build
 	trade_to_ohlc 
 
 lint:
-	ruff check --fix
+	poetry run ruff check --fix
 
 format:
-	ruff format .
+	poetry run ruff format .
+
+lint-and-format: lint format
