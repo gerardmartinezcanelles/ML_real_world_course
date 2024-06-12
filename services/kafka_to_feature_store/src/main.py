@@ -72,3 +72,5 @@ if __name__ == '__main__':
         feature_group_name=config.feature_group_name,
         feature_group_version=config.feature_group_version,
     )
+
+    

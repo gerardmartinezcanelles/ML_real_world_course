@@ -5,7 +5,6 @@ from pydantic_settings import BaseSettings
 
 load_dotenv(find_dotenv())
 
-
 class Config(BaseSettings):
     kafka_input_topic: str = os.environ['KAFKA_INPUT_TOPIC']
     kafka_output_topic: str = os.environ['KAFKA_OUTPUT_TOPIC']

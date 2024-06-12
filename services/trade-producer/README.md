@@ -1,1 +1,0 @@
-KAFKA_BROKER_ADDRESS = 'localhost:19092'
