@@ -1,22 +1,29 @@
+# write a docker compose with 3 services
+# - services/trade_producer.py
+# - services/trade_to_ohlc.py
+# - services/kafka_to_feature_store.py
+# make sure that I can connect to the redpanda_broker
 version: "3.7"
-name: feature_pipeline
+name: backfill_pipeline
 networks:
   redpanda_network:
     name: redpanda_network
     driver: bridge
 services:
-
+  
   trade-producer:
-    #container_name: trade-producer
+    # container_name: trade-producer
     build:
       context: ../services/trade-producer
     networks:
       - redpanda_network
     environment:
       KAFKA_BROKER_ADDRESS: redpanda-0:9092
-
+      LIVE_OR_HISTORICAL: historical
+      LAST_N_DAYS: 7
+      
   trade_to_ohlc:
-    #container_name: trade_to_ohlc
+    # container_name: trade_to_ohlc
     build:
       context: ../services/trade_to_ohlc
     networks:
@@ -24,17 +31,18 @@ services:
     environment:
       KAFKA_BROKER_ADDRESS: redpanda-0:9092
       OHLC_WINDOW_SECONDS: 60
-    env_file:
-      - ../services/trade_to_ohlc/.env
 
   kafka_to_feature_store:
-    container_name: kafka_to_feature_store
+    # container_name: kafka_to_feature_store
     build:
       context: ../services/kafka_to_feature_store
     networks:
       - redpanda_network
     environment:
       KAFKA_BROKER_ADDRESS: redpanda-0:9092
+      LIVE_OR_HISTORICAL: historical
+      BUFFER_SIZE: 1440 # this corresponds to saving data for 1 day if you have only one product.
+
     # pass environment variables from my .env file
     env_file:
       - ../services/kafka_to_feature_store/.env

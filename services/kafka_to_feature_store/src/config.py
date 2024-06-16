@@ -13,6 +13,6 @@ class Config(BaseSettings):
     feature_group_version: int = os.environ['FEATURE_GROUP_VERSION']  # 1
     hopsworks_project_name: str = os.environ['HOPSWORKS_PROJECT_NAME']
     api_key_value: str = os.environ['HOPSWORKS_API_KEY']
-
-
+    buffer_size: int = 1 #os.environ['BUFFER_SIZE']
+    live_or_historical : str = 'live' #by default 'kafka_to_feature_store` to run live
 config = Config()

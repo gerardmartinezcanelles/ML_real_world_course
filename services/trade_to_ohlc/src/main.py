@@ -10,6 +10,7 @@ def trade_to_olhc(
     kafka_input_topic: str,
     kafka_output_topic: str,
     kafka_broker_address: str,
+    kafka_consumer_group: str,
     ohcl_window_seconds: int,
 ) -> None:
     """
@@ -21,6 +22,7 @@ def trade_to_olhc(
         kafka_input_topic: str: Kafka topic to read trade data from
         kafka_output_topic: str: Kafka topic to write ohlc data to
         kafka_broker_address: str: Kafka broker adress
+        kafka_consumer_group : str : Kafka consumer group
         ohcl_window_seconds: str: window size in seconds for OHLC aggregation
 
     Returns:
@@ -30,7 +32,7 @@ def trade_to_olhc(
     # This handles all low communication with Kafka
     app = Application(
         broker_address=kafka_broker_address,
-        consumer_group='trade_to_ohlc',
+        consumer_group= kafka_consumer_group, #'trade_to_ohlc',
         auto_offset_reset='earliest',  # process all messages from the input topic when this service starts
         # auto_create_reset="latest",  # forget about pass messages, process only the ones coming from this moment
     )
@@ -77,7 +79,7 @@ def trade_to_olhc(
     # apply transformation to the incoming data - start
     # Here we need to define how we transform the incoming trades into OHLC candles
     sdf = sdf.tumbling_window(duration_ms=timedelta(seconds=ohcl_window_seconds))
-    sdf = sdf.reduce(reducer=update_ohlc_candle, initializer=init_ohlc_candle).current()
+    sdf = sdf.reduce(reducer=update_ohlc_candle, initializer=init_ohlc_candle).final()
 
     # Extract the open, high, low, close prices from the values
     # The current format of the messages is the following:
@@ -111,9 +113,13 @@ def trade_to_olhc(
 
 
 if __name__ == '__main__':
-    trade_to_olhc(
-        kafka_input_topic=config.kafka_input_topic,
-        kafka_output_topic=config.kafka_output_topic,
-        kafka_broker_address=config.kafka_broker_address,
-        ohcl_window_seconds=config.ohcl_window_seconds,
-    )
+    try:
+        trade_to_olhc(
+            kafka_input_topic=config.kafka_input_topic,
+            kafka_output_topic=config.kafka_output_topic,
+            kafka_broker_address=config.kafka_broker_address,
+            kafka_consumer_group=config.kafka_consumer_group,
+            ohcl_window_seconds=config.ohcl_window_seconds,
+        )
+    except KeyboardInterrupt:
+        logger.info('Exiting...')

@@ -1,14 +1,23 @@
 import os
-from dotenv import load_dotenv, find_dotenv
+from typing import List
+
+from dotenv import find_dotenv, load_dotenv
+from pydantic_settings import BaseSettings
 
 load_dotenv(find_dotenv())
 
-kafka_broker_adress = os.environ['KAFKA_BROKER_ADDRESS'] #localhost:19092" #localhost:19092 , "redpanda-0:9092"
-kafka_topic_name = "trade"
-product_id = 'ETH/EUR' #'BTC/USD'
 
-# kafka_broker_adress = os.environ[
-#     'KAFKA_BROKER_ADDRESS'
-# ]  # localhost:19092" #localhost:19092 , "redpanda-0:9092"
-# kafka_topic_name = 'trade'
-# product_id = 'BTC/USD'
+class Config(BaseSettings):
+    kafka_broker_address: str = os.environ['KAFKA_BROKER_ADDRESS']
+    kafka_topic_name: str = 'trade'
+    product_ids: List[str] = [
+        'ETH/USD'
+        # 'BTC/USD',
+        # 'ETH/EUR'
+    ]
+    # Challenge: validate that `live_or_historical` is either
+    # 'live' or 'historical' using pydantic settings.
+    live_or_historical: str = os.environ['LIVE_OR_HISTORICAL'] #'historical' #'live'
+    last_n_days: int = os.environ['LAST_N_DAYS']
+
+config = Config()

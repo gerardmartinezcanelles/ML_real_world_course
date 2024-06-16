@@ -1,6 +1,10 @@
 run-dev:
 	poetry run python src/main.py
 
+run-dev-historical:
+	KAFKA_CONSUMER_GROUP=trade_to_ohlc_test \
+	poetry run python src/main.py
+
 build:
 	docker build -t trade_to_ohlc .
 
